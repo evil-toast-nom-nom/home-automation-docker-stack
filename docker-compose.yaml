@@ -1,0 +1,35 @@
+version: '3'
+services:
+  nodered:
+    container_name: node-red
+    image: nodered/node-red
+    volumes:
+      - /var/opt/node-red/data/:/data
+    restart: unless-stopped
+    ports:
+      - "1880:1880"
+  
+  mosquitto:
+    container_name: mosquitto
+    image: eclipse-mosquitto
+    
+    volumes:
+      - /var/opt/mosquitto/data/:/mosquitto/data
+      - /var/opt/mosquitto/log/:/mosquitto/log
+      - /var/opt/mosquitto/config/:/mosquitto/config
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+      
+  homeassistant:
+    depends_on:
+      - mosquitto
+      - nodered
+    container_name: home-assistant
+    image: homeassistant/home-assistant:stable
+    volumes:
+      - /var/opt/home-assistant:/config
+    environment:
+      - TZ=Africa/Johannesburg
+    restart: unless-stopped
+    network_mode: host
